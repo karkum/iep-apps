@@ -332,7 +332,11 @@ object DruidDatabaseActor {
   case class DatasourceMetadata(name: String, datasource: Datasource) {
 
     val metrics: List[MetricMetadata] = datasource.metrics.map { metric =>
-      MetricMetadata(metric, Map("name" -> metric.name, "nf.datasource" -> name))
+      var tags = Map("name" -> metric.name, "nf.datasource" -> name)
+      if (metric.isTimer) {
+        tags += ("statistic" -> "percentile")
+      }
+      MetricMetadata(metric, tags)
     }
 
     val metricTags: List[Map[String, String]] = metrics.map(_.tags)
